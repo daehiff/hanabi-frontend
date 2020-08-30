@@ -38,7 +38,19 @@ class Request {
       this._handleServerResponse(error);
     }
   }
+  async getUser() {
+    try {
+      let resp = await this.instance.get("user/status");
+      this._updateToken(resp.headers.auth);
+      if (resp.status == 200) {
+        return resp.data.success.message;
+      } // TODO exists an else case?
+    } catch (error) {
+      this._checkAuthError(error);
+      this._handleServerResponse(error);
+    }
 
+  }
   async register(registerData) {
     try {
       let resp = await axios.post(`${this.baseURL}/auth/register`, registerData);
@@ -92,6 +104,81 @@ class Request {
         return resp.data.success.message;
       } // TODO exists an else case? 
     } catch (error) {
+      this._checkAuthError(error);
+      this._handleServerResponse(error);
+    }
+  }
+  async adjustSettings(newLobby) {
+    try {
+      let resp = await this.instance.post(`lobby/${newLobby.lid}/settings`, { "settings": newLobby.gameSettings });
+      this._updateToken(resp.headers.auth);
+      if (resp.status == 200) {
+        return resp.data.success.message;
+      } // TODO exists an else case? 
+    } catch (error) {
+      this._checkAuthError(error);
+      this._handleServerResponse(error);
+    }
+  }
+  async launchGame(lobby) {
+    try {
+      let resp = await this.instance.post(`lobby/${lobby.lid}/launch`);
+      this._updateToken(resp.headers.auth);
+      if (resp.status == 200) {
+        return resp.data.success.message;
+      } // TODO exists an else case? 
+    } catch (error) {
+      this._checkAuthError(error);
+      this._handleServerResponse(error);
+    }
+  }
+
+  async leaveLobby(lobby) {
+    try {
+      let resp = await this.instance.post(`lobby/${lobby.lid}/leave`);
+      this._updateToken(resp.headers.auth);
+      if (resp.status == 200) {
+        return resp.data.success.message;
+      } // TODO exists an else case? 
+    } catch (error) {
+      this._checkAuthError(error);
+      this._handleServerResponse(error);
+    }
+  }
+
+  async destroyLobby(lobby) {
+    try {
+      let resp = await this.instance.post(`lobby/${lobby.lid}/remove`);
+      this._updateToken(resp.headers.auth);
+      if (resp.status == 200) {
+        return resp.data.success.message;
+      } // TODO exists an else case? 
+    } catch (error) {
+      console.log(error);
+      this._checkAuthError(error);
+      this._handleServerResponse(error);
+    }
+  }
+  async gameStatus(gameId) {
+    try {
+      let resp = await this.instance.get(`game/${gameId}/status`);
+      let cResps = await this.instance.get(`game/${gameId}/cards`);
+      let ocResp = await this.instance.get(`game/${gameId}/ownCards`);
+      this._updateToken(resp.headers.auth);
+      if (resp.status == 200 && cResps.status == 200 && ocResp.status == 200) {
+        let game = resp.data.success.message;
+        let cards = cResps.data.success.message;
+        let ownCards = ocResp.data.success.message;
+        game.discardPile = cards.discardPile;
+        game.players.forEach(player => {
+          player.cards = cards[player.playerId];
+          return player;
+        });
+        game.ownCards = ownCards;
+        return game;
+      } // TODO exists an else case? 
+    } catch (error) {
+      console.log(error);
       this._checkAuthError(error);
       this._handleServerResponse(error);
     }

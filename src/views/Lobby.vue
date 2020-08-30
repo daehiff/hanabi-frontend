@@ -7,7 +7,7 @@
       <div class="joinedPlayerList">
         <span
           class="noPlayerSpan"
-          v-if="joinedLobby.player == null || joinedLobby.player.lenght == 0"
+          v-if="joinedLobby.player == null || joinedLobby.player.length == 0"
         >
           No Player joined</span
         >
@@ -26,11 +26,35 @@
         <div>
           <p>Rainbow</p>
           &nbsp;
-          <vs-switch :disabled="!isHost" v-model="isRainbow"></vs-switch>
+          <vs-switch
+            :disabled="!joinedLobby.isHost || loading"
+            :value="joinedLobby.gameSettings.isRainbow"
+            @input="updateSettings('RAINBOW', $event)"
+          ></vs-switch>
         </div>
-        <vs-input-number :disabled="!isHost" :max="10" :min="2" v-model="hints" label="Hints:" />
-        <vs-input-number :disabled="!isHost" :max="4" :min="2" v-model="lives" label="Lives:" />
-        <vs-select :disabled="!isHost" placeholder="Select Level" label="Level" v-model="level">
+        <vs-input-number
+          :disabled="!joinedLobby.isHost || loading"
+          :max="10"
+          :min="2"
+          :value="joinedLobby.gameSettings.amtHints"
+          @input="updateSettings('HINT', $event)"
+          label="Hints:"
+        />
+        <vs-input-number
+          :disabled="!joinedLobby.isHost || loading"
+          :max="4"
+          :min="2"
+          :value="joinedLobby.gameSettings.amtLives"
+          @input="updateSettings('LIVE', $event)"
+          label="Lives:"
+        />
+        <vs-select
+          :disabled="!joinedLobby.isHost || loading"
+          placeholder="Select Level"
+          label="Level"
+          :value="joinedLobby.gameSettings.level"
+          @input="updateSettings('LEVEL', $event)"
+        >
           <vs-select-item
             :key="index"
             :value="item"
@@ -40,13 +64,22 @@
         </vs-select>
       </div>
     </div>
-    <vs-button :disabled="!isHost" class="button" color="success"
+    <vs-button
+      :disabled="!joinedLobby.isHost || loading"
+      class="button"
+      color="success"
+      @click="launchGameHandle"
       >Launch Game</vs-button
     >
-    <vs-button v-if="isHost" class="button" color="danger"
+    <vs-button
+      v-if="joinedLobby.isHost"
+      :disabled="loading"
+      @click="destroyLobbyHandle"
+      class="button"
+      color="danger"
       >Close Lobby</vs-button
     >
-    <vs-button v-else class="button" color="danger"
+    <vs-button v-else class="button" :disabled="loading" color="danger" @click="leaveLobbyHandle"
       >Leave Lobby</vs-button
     >
   </div>
@@ -59,93 +92,86 @@ export default {
   name: "Lobby",
   created() {
     this.stopPoll = false;
-    //this.pollLobbyStatus();
+    this.pollLobbyStatus();
   },
   data() {
     return {
-      isHost: true,
-      hints: 8,
-      lives: 3,
-      isRainbow: false,
-      level: "Hard", // TODO
       levels: ["Hard", "Easy", "Middle", "Beginner"],
       stopPoll: false,
+      loading: false,
     };
   },
-  watch: {
-    hints(newVal, oldVal) {
-      if (newVal == oldVal) {
-        return;
-      }
-      this.updateSettings({
-        isRainbow: this.isRainbow,
-        amtHints: Number(newVal),
-        amtLives: this.lives,
-        level: this.level,
-      });
-    },
-    lives(newVal, oldVal) {
-      if (newVal == oldVal) {
-        return;
-      }
-      this.updateSettings({
-        isRainbow: this.isRainbow,
-        amtHints: this.hints,
-        amtLives: Number(newVal),
-        level: this.level,
-      });
-    },
-    isRainbow(newVal, oldVal) {
-      if (newVal == oldVal) {
-        return;
-      }
-      this.updateSettings({
-        isRainbow: newVal,
-        amtHints: this.hints,
-        amtLives: this.lives,
-        level: this.level,
-      });
-    },
-    level(newVal, oldVal) {
-      if (newVal == oldVal) {
-        return;
-      }
-      this.updateSettings({
-        isRainbow: newVal,
-        amtHints: this.hints,
-        amtLives: this.lives,
-        level: newVal,
-      });
-    },
-  },
   methods: {
-    handleUpdateSettings() {
-      this.updateSettings({
-        isRainbow: this.isRainbow,
-        amtHints: this.hints,
-        amtLives: this.lives,
-        level: this.level,
-      });
+    updateSettings(type, input) {
+      this.settingsInputChange({ type: type, input: input });
+    },
+    async destroyLobbyHandle() {
+      this.loading = true;
+      await this.destroyLobby();
+      this.stopPoll = true;
+      this.loading = false;
+      this.$router.push({name: "lobbyBrowser"});
+    },
+    async launchGameHandle() {
+      this.loading = true;
+      try {
+        let lobby = await this.launchGame();
+        this.$router.push({name: "game", params: { gameId: lobby.gameId }}); 
+        
+        this.loading = false;
+        this.stopPoll = true;
+      } catch (error) {
+        if (error == "LOGIN") {
+          this.errorCallback("LOGIN", "Pease Login Again");
+        } else {
+          this.errorCallback("INTERNAL", error);
+        }
+        console.error(error);
+        this.loading = false;
+      }
+    },
+    async closeLobby() {},
+    async leaveLobbyHandle() {
+      this.loading = true;
+      try {
+        await this.leaveLobby();
+        this.loading = false;
+        this.stopPoll = true;
+        this.$router.push({name: "lobbyBrowser"});
+      } catch (error) {
+        if (error == "LOGIN") {
+          this.errorCallback("LOGIN", "Pease Login Again");
+        } else {
+          this.errorCallback("INTERNAL", error);
+        }
+        console.error(error);
+        this.loading = false;
+      }
     },
     async pollLobbyStatus() {
       if (this.stopPoll) {
         return;
       }
       try {
-        await this.getLobbyStatus(this.$route.params.lobbyId);
+        let lobby = await this.getLobbyStatus(this.$route.params.lobbyId);
+        if (lobby.launched) {
+          this.stopPoll = true;
+          this.$router.push({name: "game", params: { gameId: lobby.gameId }});
+        }
         setTimeout(this.pollLobbyStatus, 2000);
       } catch (error) {
         if (error == "LOGIN") {
           this.$router.push("login"); // TODO create global login popup
         } else {
-          console.error("Lobbybrowser", error);
+          this.errorCallback("INTERNAL", "Lobby has been closed");
+          this.$router.push({name: "lobbyBrowser"});
         }
       }
     },
-    ...mapActions(["getLobbyStatus", "updateSettings"]),
+    ...mapActions(["getLobbyStatus", "settingsInputChange", "launchGame", "leaveLobby", "destroyLobby"]),
   },
   computed: {
-    ...mapState(["joinedLobby"]),
+    ...mapState(["joinedLobby", "errorCallback"]),
   },
 };
 </script>

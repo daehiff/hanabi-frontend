@@ -9,6 +9,7 @@ import Lobby from "./views/Lobby";
 
 import Game from "./views/Game";
 
+import store from "./store";
 
 const router = new VueRouter({
   mode: 'history',
@@ -16,10 +17,12 @@ const router = new VueRouter({
     {
       name: 'lobbyBrowser',
       path: '/', component: LobbyBrowser,
-      beforeEnter(to, from, next) {
+      async beforeEnter(to, from, next) {
+
         let authToken = localStorage.getItem('hanabi-auth-token');
+
         if (authToken == null) {
-          next("/login");
+          next("/login"); // TOOD create fancy popup or sth...
         } else {
           next();
         }
@@ -39,10 +42,19 @@ const router = new VueRouter({
     }
 
   ]
-
-
-
 });
+
+router.beforeEach(async (to, from, next) => {
+  try {
+    await store._actions.setUser[0]();
+    next();
+  } catch (error) {
+    if (to.name != "login") {
+      next("/login");
+    } else  next();
+  }
+});
+
 
 
 
