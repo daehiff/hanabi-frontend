@@ -13,6 +13,7 @@ import store from "./store";
 
 const router = new VueRouter({
   mode: 'history',
+  base: '/hanabi-frontend/',
   routes: [
     {
       name: 'lobbyBrowser',
