@@ -89,6 +89,7 @@
           v-for="pile in gameToPlay.piles"
           :key="pile[0]"
           class="card"
+          :isStack="true"
           :card="{ color: pile[0], number: pile[1] }"
         ></card>
       </div>
@@ -130,6 +131,7 @@
               v-for="card in player.cards"
               :key="card.cid"
               :card="card"
+              :isStack="false"
             ></card>
           </div>
           <vs-button @click="showGiveHintHandle(player)">Give Hint</vs-button>
@@ -315,7 +317,7 @@ export default {
 }
 .playerCards {
   width: 100%;
-  height: 5em;
+  height: 7em;
   display: flex;
   justify-content: space-evenly;
   align-items: center;
