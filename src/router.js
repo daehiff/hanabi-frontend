@@ -30,16 +30,16 @@ const router = new VueRouter({
       }
     },
     {
-      name: 'login', path: 'login', component: Login
+      name: 'login', path: '/login', component: Login
     },
     {
-      name: 'register', path: 'register', component: Register
+      name: 'register', path: '/register', component: Register
     },
     {
-      name: 'lobby', path: 'lobby/:lobbyId', component: Lobby
+      name: 'lobby', path: '/lobby/:lobbyId', component: Lobby
     },
     {
-      name: 'game', path: 'game/:gameId', component: Game
+      name: 'game', path: '/game/:gameId', component: Game
     }
 
   ]

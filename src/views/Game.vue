@@ -149,8 +149,8 @@ export default {
     firework: Firework,
   },
   created() {
+    console.log("Game");
     this.pollGame();
-    console.log(process.env.BACKEND_BASE_URL);
   },
   data() {
     return {
@@ -232,8 +232,10 @@ export default {
     ...mapActions(["getGameStatus", "makeMove"]),
     async pollGame() {
       if (this.stopPoll) {
+        console.log("Stop");
         return;
       }
+      console.log("Poll");
       try {
         await this.getGameStatus(this.$route.params.gameId);
         if (this.gameToPlay.state == "Won") {
