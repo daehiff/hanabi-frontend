@@ -78,7 +78,10 @@
       <p>Lives: {{ gameToPlay.lives }}</p>
       <p>Hints: {{ gameToPlay.hints }}</p>
       <p>Points {{ gameToPlay.points }}</p>
-      <p>Discard Pile: {{gameToPlay.discardPile.length  }}</p>
+      <p>
+        Discard Pile:
+        {{ gameToPlay.discardPile != null ? gameToPlay.discardPile.length : 0 }}
+      </p>
       <br />
       <p>Stacks</p>
       <div class="playerCards">
@@ -231,10 +234,8 @@ export default {
     ...mapActions(["getGameStatus", "makeMove"]),
     async pollGame() {
       if (this.stopPoll) {
-        console.log("Stop");
         return;
       }
-      console.log("Poll");
       try {
         await this.getGameStatus(this.$route.params.gameId);
         if (this.gameToPlay.state == "Won") {
