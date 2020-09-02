@@ -39,8 +39,8 @@ const store = new Vuex.Store({
     setLobby(state, lobby) {
       state.joinedLobby = lobby;
     },
-    setGame() {
-      //state.gameToPlay = game;
+    setGame(state, game) {
+      state.gameToPlay = game;
     }
   },
   actions: {
