@@ -1,7 +1,7 @@
 <template>
   <div @click="clickedHandle" class="cardBackground">
     <p v-if="card.hintColor == null">x</p>
-    <p v-else>{{ card.hintColor }}</p>
+    <p v-else v-for="color in card.hintColor" :key="color">{{ color }}</p>
     <br />
     <p v-if="card.hintNumber == null">x</p>
     <p v-else>{{ card.hintNumber }}</p>

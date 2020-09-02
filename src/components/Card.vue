@@ -1,6 +1,6 @@
 <template>
   <div @click="clickedHandle" class="background" :class="background">
-    <p>{{ card.number }}</p>
+    <p>{{ (card.number == 0 ) ? 'x' : card.number }}</p>
   </div>
 </template>
 

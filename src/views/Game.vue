@@ -1,13 +1,40 @@
 <template>
   <div>
+    <vs-popup
+      :button-close-hidden="true"
+      :title="wonLostTitle"
+      :active.sync="showWonLost"
+    >
+      <div class="wonLostPopup">
+        <p class="wonLostText" v-if="gameToPlay.state == 'Won'">
+          Congratulations you have won with : {{ gameToPlay.points }} Points
+        </p>
+        <p class="wonLostText" v-else>You Lost.</p>
+        <vs-button
+          class="wonLostButton"
+          @click="$router.push({ name: 'lobbyBrowser' })"
+          >Back to Main Menu</vs-button
+        >
+      </div>
+    </vs-popup>
+    <firework
+      id="firework"
+      ref="firework"
+      :boxHeight="'100%'"
+      :boxWidth="'100%'"
+    >
+    </firework>
     <vs-popup :title="popupTitle" :active.sync="activatePopup">
       <div v-if="isPlayAction">
         <div>
           {{ cardData }}
         </div>
+        <p class="playError" v-if="playError != null">Error: {{ playError }}</p>
         <div class="cardButtons">
-          <vs-button>Play Card</vs-button>
-          <vs-button>Discard Card</vs-button>
+          <vs-button @click="cardMoveHandle('DiscardAction')"
+            >Discard Card</vs-button
+          >
+          <vs-button @click="cardMoveHandle('PlayAction')">Play Card</vs-button>
         </div>
       </div>
       <div v-else>
@@ -41,42 +68,68 @@
             </vs-select>
           </div>
         </div>
+        <p class="playError" v-if="playError != null">Error: {{ playError }}</p>
         <div class="cardButtons">
-          <vs-button>Give Hint</vs-button>
+          <vs-button @click="giveHintHandle">Give Hint</vs-button>
         </div>
       </div>
     </vs-popup>
     <div class="cardWrapper">
-      <div class="playerElement">
-        <p>{{ user.username }} (me)</p>
-        <div class="playerCards">
-          <action-card
-            @cardMove="showCardMoveHandle"
+      <p>Lives: {{ gameToPlay.lives }}</p>
+      <p>Hints: {{ gameToPlay.hints }}</p>
+      <p>Points {{ gameToPlay.points }}</p>
+      <p>Discard Pile: {{ 1 }}</p>
+      <br />
+      <p>Stacks</p>
+      <div class="playerCards">
+          <card
+            v-for="pile in gameToPlay.piles" :key="pile[0]"
             class="card"
-            v-for="card in gameToPlay.ownCards"
-            :key="card.cid"
-            :card="card"
-          ></action-card>
-        </div>
+            :card="{ color: pile[0], number: pile[1] }"
+          ></card>
       </div>
     </div>
-    <br />
-    <div class="cardWrapper">
-      <div
-        class="playerElement"
-        v-for="player in gameToPlay.players"
-        :key="player.playerId"
-      >
-        <p>{{ player.name }}:</p>
-        <div class="playerCards">
-          <card
-            class="card"
-            v-for="card in player.cards"
-            :key="card.cid"
-            :card="card"
-          ></card>
+    <div class="cardWrapperWrapper">
+      <div class="cardWrapper">
+        <div
+          :class="[
+            'playerElement',
+            user.uid == gameToPlay.currentPlayer ? 'activePlayer' : '',
+          ]"
+        >
+          <p>{{ user.username }} (me)</p>
+          <div class="playerCards">
+            <action-card
+              @cardMove="showCardMoveHandle"
+              :class="['card']"
+              v-for="card in gameToPlay.ownCards"
+              :key="card.cid"
+              :card="card"
+            ></action-card>
+          </div>
         </div>
-        <vs-button @click="showGiveHintHandle">Give Hint</vs-button>
+      </div>
+      <br />
+      <div class="cardWrapper">
+        <div
+          :class="[
+            'playerElement',
+            player.playerId == gameToPlay.currentPlayer ? 'activePlayer' : '',
+          ]"
+          v-for="player in gameToPlay.players"
+          :key="player.playerId"
+        >
+          <p>{{ player.name }}:</p>
+          <div class="playerCards">
+            <card
+              class="card"
+              v-for="card in player.cards"
+              :key="card.cid"
+              :card="card"
+            ></card>
+          </div>
+          <vs-button @click="showGiveHintHandle(player)">Give Hint</vs-button>
+        </div>
       </div>
     </div>
   </div>
@@ -86,27 +139,34 @@
 import Card from "../components/Card";
 import ActionCard from "../components/ActionCard";
 import { mapState, mapActions } from "vuex";
+import Firework from "../components/Firework";
 export default {
   name: "Game",
   components: {
     card: Card,
     "action-card": ActionCard,
+    firework: Firework,
   },
   created() {
     this.pollGame();
+    console.log(process.env.BACKEND_BASE_URL);
   },
   data() {
     return {
+      playError: null,
       popupTitle: "UNDEFINED",
       cardData: {},
       hintSettings: {
         isColor: false,
+
         color: "Red",
         number: 1,
       },
       activatePopup: false,
       isPlayAction: false,
-      stopPoll: false,
+      stopPoll: true,
+      showWonLost: false,
+      wonLostTitle: "UNDEFINED",
     };
   },
   computed: {
@@ -118,11 +178,39 @@ export default {
     ...mapState(["gameToPlay", "user"]),
   },
   methods: {
-    cardMoveHandle() {},
-    giveHintHandle() {},
+    async cardMoveHandle(tag) {
+      this.playError = null;
+      let moveAction = {
+        tag: tag,
+        cardId: this.cardData.cid,
+      };
+      try {
+        await this.makeMove(moveAction);
+        this.activatePopup = false;
+      } catch (error) {
+        this.playError = error;
+      }
+    },
+    async giveHintHandle() {
+      this.playError = null;
+      // TODO loading animation
+      let moveAction = {
+        tag: "HintAction",
+        targetPlayer: this.hintSettings.pid,
+        hint: this.hintSettings.isColor
+          ? { Left: this.hintSettings.color }
+          : { Right: Number(this.hintSettings.number) },
+      };
+      try {
+        await this.makeMove(moveAction);
+        this.activatePopup = false;
+      } catch (error) {
+        this.playError = error;
+      }
+    },
     showCardMoveHandle(cardInfo) {
+      this.playError = null;
       if (this.gameToPlay.currentPlayer != this.user.uid) {
-        // TODO check if valid
         return; // TODO log error
       }
       this.popupTitle = "Play Card";
@@ -130,21 +218,36 @@ export default {
       this.activatePopup = true;
       this.cardData = cardInfo;
     },
-    showGiveHintHandle() {
+    showGiveHintHandle(player) {
+      this.playError = null;
       if (this.gameToPlay.currentPlayer != this.user.uid) {
         return; // TODO log error
       }
+      this.hintSettings.pid = player.playerId;
       this.popupTitle = "Give Hint";
       this.isPlayAction = false;
       this.activatePopup = true;
     },
-    ...mapActions(["getGameStatus"]),
+    ...mapActions(["getGameStatus", "makeMove"]),
     async pollGame() {
       if (this.stopPoll) {
         return;
       }
       try {
-        await this.getGameStatus(this.$route.params.gameId); // TODO check if game is won
+        await this.getGameStatus(this.$route.params.gameId);
+        if (this.gameToPlay.state == "Won") {
+          this.stopPoll;
+          this.$refs["firework"].createFireWork(
+            this.gameToPlay.maxPoints,
+            this.gameToPlay.points
+          );
+          this.showWonLost = true;
+          this.wonLostTitle = "Won";
+        } else if (this.gameToPlay.state == "Lost") {
+          this.stopPoll;
+          this.showWonLost = true;
+          this.wonLostTitle = "Lost";
+        }
         setTimeout(this.pollGame, 2000);
       } catch (error) {
         if (error == "LOGIN") {
@@ -159,12 +262,44 @@ export default {
 </script>
 
 <style scoped>
+.pilesfade-enter-active,
+.pilesfade-leave-active {
+  transition: opacity 2s;
+}
+.pilesfade-enter, .pilesfade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+  opacity: 0;
+}
+.wonLostPopup {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+.wonLostButton {
+  margin-top: 2em;
+}
+.wonLostText {
+  text-align: center;
+  font-size: 150%;
+}
+.activePlayer {
+  border: 3px solid green !important;
+}
+.cardWrapperWrapper {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+  overflow: auto;
+}
 .cardWrapper {
   width: 80%;
   margin-bottom: 0.5em;
 }
 .card {
-  width: 2em;
+  width: 18%;
+  max-width: 50px;
   height: 100%;
 }
 .playerElement {
@@ -182,7 +317,8 @@ export default {
   justify-content: space-evenly;
   align-items: center;
   flex-direction: row;
-  margin: 0.5em;
+  margin: 0em;
+  margin-bottom: 0.5em;
 }
 
 .cardButtons {
@@ -204,5 +340,8 @@ export default {
   justify-content: center;
   align-items: center;
   flex-direction: row;
+}
+.playError {
+  color: red;
 }
 </style>

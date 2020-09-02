@@ -4,6 +4,7 @@ const AUTH_ERROR = 1;
 
 class Request {
   constructor(baseUrl) {
+    console.log(baseUrl);
     this.baseURL = baseUrl;
     this.instance = axios.create({
       baseURL: baseUrl,
@@ -35,6 +36,7 @@ class Request {
       this._updateToken(resp.headers.auth);
       return resp.data.success.message;
     } catch (error) {
+      console.log(error);
       this._handleServerResponse(error);
     }
   }
@@ -154,7 +156,6 @@ class Request {
         return resp.data.success.message;
       } // TODO exists an else case? 
     } catch (error) {
-      console.log(error);
       this._checkAuthError(error);
       this._handleServerResponse(error);
     }
@@ -178,7 +179,19 @@ class Request {
         return game;
       } // TODO exists an else case? 
     } catch (error) {
-      console.log(error);
+      this._checkAuthError(error);
+      this._handleServerResponse(error);
+    }
+  }
+
+  async makeMove(moveAction, gameId) {
+    try {
+      let resp = await this.instance.post(`game/${gameId}/move`, moveAction);
+      this._updateToken(resp.headers.auth);
+      if (resp.status == 200) {
+        return resp.data.success.message;
+      } // TODO exists an else case? 
+    } catch (error) {
       this._checkAuthError(error);
       this._handleServerResponse(error);
     }

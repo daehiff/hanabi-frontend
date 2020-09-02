@@ -27,7 +27,6 @@ export default {
     };
   },
   created() {
-
     this.initialize({errorCallback: this.showErrorPopup});
   },
   methods: {

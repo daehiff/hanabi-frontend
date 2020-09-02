@@ -18,15 +18,13 @@ const store = new Vuex.Store({
       console.error(type, message);
       return;
     },
-    request: new Request("http://localhost:8080"),
+    request: new Request(process.env.VUE_APP_BACKEND_BASE_URL),
     user: {},
     availableLobbies: [],
     joinedLobby: {
       gameSettings: {}
     },
-    gameToPlay: {
-
-    }
+    gameToPlay: {}
   },
   mutations: {
     setErrorCallback(state, errorCallback) {
@@ -41,8 +39,8 @@ const store = new Vuex.Store({
     setLobby(state, lobby) {
       state.joinedLobby = lobby;
     },
-    setGame(state, game) {
-      state.gameToPlay = game;
+    setGame() {
+      //state.gameToPlay = game;
     }
   },
   actions: {
@@ -142,12 +140,17 @@ const store = new Vuex.Store({
       commit("setLobby", { gameSettings: {} });
     },
 
-    async getGameStatus({state, commit}, gameId = null) {
-        if (gameId == null) {
-          gameId = state.gameToPlay.gid;
-        }
-        let game = await state.request.gameStatus(gameId);
-        commit("setGame", game);
+    async getGameStatus({ state, commit }, gameId = null) {
+      if (gameId == null) {
+        gameId = state.gameToPlay.gid;
+      }
+      let game = await state.request.gameStatus(gameId);
+      commit("setGame", game);
+    },
+
+    async makeMove({ state, commit }, moveAction) {
+      let game = await state.request.makeMove(moveAction, state.gameToPlay.gid);
+      commit("setGame", game);
     }
   }
 });
