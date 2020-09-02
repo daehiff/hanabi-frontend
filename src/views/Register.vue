@@ -44,7 +44,7 @@
       color="primary"
       type="border"
       :disabled="loading"
-      @click="$router.push({name: 'login'})"
+      @click="$router.push({ name: 'login' })"
       >Back to Login</vs-button
     >
   </div>

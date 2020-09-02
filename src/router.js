@@ -22,7 +22,7 @@ const router = new VueRouter({
         let authToken = localStorage.getItem('hanabi-auth-token');
 
         if (authToken == null) {
-          next("/login"); // TOOD create fancy popup or sth...
+          next({ name: 'login' }); // TOOD create fancy popup or sth...
         } else {
           next();
         }
@@ -50,8 +50,8 @@ router.beforeEach(async (to, from, next) => {
     next();
   } catch (error) {
     if (to.name != "login") {
-      next("/login");
-    } else  next();
+      next({ name: 'login' }); // TOOD create fancy popup or sth...
+    } else next();
   }
 });
 
