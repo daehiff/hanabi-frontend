@@ -12,7 +12,7 @@ import Game from "./views/Game";
 import store from "./store";
 
 const router = new VueRouter({
-  mode: 'history',
+  mode: 'hash',
   base: '/hanabi-frontend/',
   routes: [
     {
@@ -30,16 +30,16 @@ const router = new VueRouter({
       }
     },
     {
-      name: 'login', path: '/login', component: Login
+      name: 'login', path: 'login', component: Login
     },
     {
-      name: 'register', path: '/register', component: Register
+      name: 'register', path: 'register', component: Register
     },
     {
-      name: 'lobby', path: '/lobby/:lobbyId', component: Lobby
+      name: 'lobby', path: 'lobby/:lobbyId', component: Lobby
     },
     {
-      name: 'game', path: '/game/:gameId', component: Game
+      name: 'game', path: 'game/:gameId', component: Game
     }
 
   ]
@@ -51,7 +51,7 @@ router.beforeEach(async (to, from, next) => {
     next();
   } catch (error) {
     if (to.name != "login" && to.name != "register") {
-      next({ name: 'login' }); // TOOD create fancy popup or sth...
+      next({ name: 'login' }); 
     } else next();
   }
 });
