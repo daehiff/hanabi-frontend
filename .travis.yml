@@ -4,7 +4,9 @@ node_js:
 
 cache: yarn 
 
-script: yarn run build
+script: 
+  - (echo "VUE_APP_BACKEND_BASE_URL='https://hanabi-backend.herokuapp.com/'") >> .env 
+  - yarn run build
 
 deploy:
  provider: pages
