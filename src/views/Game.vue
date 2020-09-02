@@ -1,5 +1,17 @@
 <template>
-  <div>
+  <loader v-if="Object.keys(gameToPlay).length === 0"> </loader>
+  <div v-else>
+    <vs-popup :active.sync="showDiscardedCards" title="Discard Pile">
+      <div class="discardPile">
+        <div
+          v-for="card in gameToPlay.discardPile"
+          :key="card.cid"
+          class="cardDiscarded"
+        >
+          <card :isStack="true" :card="card"></card>
+        </div>
+      </div>
+    </vs-popup>
     <vs-popup
       :button-close-hidden="true"
       :title="wonLostTitle"
@@ -74,14 +86,41 @@
         </div>
       </div>
     </vs-popup>
+
+    <p class="gameHeading">Game</p>
     <div class="cardWrapper">
-      <p>Lives: {{ gameToPlay.lives }}</p>
-      <p>Hints: {{ gameToPlay.hints }}</p>
-      <p>Points {{ gameToPlay.points }}</p>
-      <p>
-        Discard Pile:
-        {{ gameToPlay.discardPile != null ? gameToPlay.discardPile.length : 0 }}
-      </p>
+      <div class="gameInfo">
+        <div class="gameInfoColumn">
+          <p>Lives: {{ gameToPlay.lives }}</p>
+          <p>Hints: {{ gameToPlay.hints }}</p>
+          <p>Points {{ gameToPlay.points }}</p>
+        </div>
+        <div class="gameInfoColumn">
+          <p>
+            Draw Pile:
+            {{
+              gameToPlay.drawPile.length != null
+                ? gameToPlay.drawPile.length
+                : 0
+            }}
+          </p>
+          <div class="gameInfoButtons">
+            <p>
+              Discard Pile:
+              {{
+                gameToPlay.discardPile != null
+                  ? gameToPlay.discardPile.length
+                  : 0
+              }}
+            </p>
+            <br style="width: 1em">
+            <vs-button @click="showDiscardedCards = true"
+              >Show Discard Pile</vs-button
+            >
+          </div>
+        </div>
+      </div>
+      <br />
       <br />
       <p>Stacks</p>
       <div class="playerCards">
@@ -146,12 +185,14 @@ import Card from "../components/Card";
 import ActionCard from "../components/ActionCard";
 import { mapState, mapActions } from "vuex";
 import Firework from "../components/Firework";
+import Loader from "../components/Loader";
 export default {
   name: "Game",
   components: {
     card: Card,
     "action-card": ActionCard,
     firework: Firework,
+    loader: Loader,
   },
   created() {
     this.pollGame();
@@ -172,12 +213,14 @@ export default {
       stopPoll: false,
       showWonLost: false,
       wonLostTitle: "UNDEFINED",
+      showDiscardedCards: false,
     };
   },
   computed: {
     colors() {
       if (this.gameToPlay.settings.isRainbow)
-        return ["Red", "Green", "Yellow", "Blue", "White", "Rainbow"];
+        return ["Red", "Green", "Yellow", "Blue", "White"];
+      // TODO remove
       else return ["Red", "Green", "Yellow", "Blue", "White"];
     },
     ...mapState(["gameToPlay", "user"]),
@@ -267,6 +310,25 @@ export default {
 </script>
 
 <style scoped>
+.gameInfo {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: space-evenly;
+}
+.gameInfoColumn {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+.gameInfoButtons {
+  display: flex;
+    flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center; 
+}
+
 .pilesfade-enter-active,
 .pilesfade-leave-active {
   transition: opacity 2s;
@@ -298,13 +360,25 @@ export default {
   width: 100%;
   overflow: auto;
 }
+.cardDiscarded {
+  height: 7em;
+  width: 40px !important;
+  margin-right: 1em;
+}
+.discardPile {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: row;
+  overflow: auto;
+}
 .cardWrapper {
   width: 80%;
   margin-bottom: 0.5em;
 }
 .card {
-  width: 18%;
-  max-width: 50px;
+  width: 15%;
+  max-width: 60px;
   height: 100%;
 }
 .playerElement {

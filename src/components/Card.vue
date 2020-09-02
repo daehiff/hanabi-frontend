@@ -2,9 +2,13 @@
   <div @click="clickedHandle" class="background" :class="background">
     <p>{{ card.number == 0 ? "x" : card.number }}</p>
     <div v-if="!isStack" class="cardhints">
-      <p>Color</p>
-      <p v-if="card.hintColor == null">x</p>
-      <p v-else v-for="color in card.hintColor" :key="color">{{ color }}</p>
+      <p v-if="card.hintColor != null || card.hintColor.length != 0">Color</p>
+      <p
+        v-for="color in card.hintColor"
+        :key="color"
+      >
+        {{ color }}
+      </p>
       <br />
       <p>Number</p>
       <p v-if="card.hintNumber == null"></p>
@@ -18,7 +22,7 @@ export default {
   name: "Card",
   props: {
     card: Object,
-    isStack: Boolean
+    isStack: Boolean,
   },
   methods: {
     async clickedHandle() {
@@ -40,7 +44,7 @@ export default {
 
 <style>
 .cardhints {
-  display:flex;
+  display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
@@ -89,5 +93,6 @@ export default {
     indigo,
     violet
   );
+  color: black;
 }
 </style>
