@@ -79,7 +79,12 @@
       color="danger"
       >Close Lobby</vs-button
     >
-    <vs-button v-else class="button" :disabled="loading" color="danger" @click="leaveLobbyHandle"
+    <vs-button
+      v-else
+      class="button"
+      :disabled="loading"
+      color="danger"
+      @click="leaveLobbyHandle"
       >Leave Lobby</vs-button
     >
   </div>
@@ -110,14 +115,14 @@ export default {
       await this.destroyLobby();
       this.stopPoll = true;
       this.loading = false;
-      this.$router.push({name: "lobbyBrowser"});
+      this.$router.push({ name: "lobbyBrowser" });
     },
     async launchGameHandle() {
       this.loading = true;
       try {
         let lobby = await this.launchGame();
-        this.$router.push({name: "game", params: { gameId: lobby.gameId }}); 
-        
+        this.$router.push({ name: "game", params: { gameId: lobby.gameId } });
+
         this.loading = false;
         this.stopPoll = true;
       } catch (error) {
@@ -137,7 +142,7 @@ export default {
         await this.leaveLobby();
         this.loading = false;
         this.stopPoll = true;
-        this.$router.push({name: "lobbyBrowser"});
+        this.$router.push({ name: "lobbyBrowser" });
       } catch (error) {
         if (error == "LOGIN") {
           this.errorCallback("LOGIN", "Pease Login Again");
@@ -156,19 +161,25 @@ export default {
         let lobby = await this.getLobbyStatus(this.$route.params.lobbyId);
         if (lobby.launched) {
           this.stopPoll = true;
-          this.$router.push({name: "game", params: { gameId: lobby.gameId }});
+          this.$router.push({ name: "game", params: { gameId: lobby.gameId } });
         }
         setTimeout(this.pollLobbyStatus, 2000);
       } catch (error) {
         if (error == "LOGIN") {
-          this.$router.push("login"); // TODO create global login popup
+          this.$router.push({ name: "login" }); // TODO create global login popup
         } else {
           this.errorCallback("INTERNAL", "Lobby has been closed");
-          this.$router.push({name: "lobbyBrowser"});
+          this.$router.push({ name: "lobbyBrowser" });
         }
       }
     },
-    ...mapActions(["getLobbyStatus", "settingsInputChange", "launchGame", "leaveLobby", "destroyLobby"]),
+    ...mapActions([
+      "getLobbyStatus",
+      "settingsInputChange",
+      "launchGame",
+      "leaveLobby",
+      "destroyLobby",
+    ]),
   },
   computed: {
     ...mapState(["joinedLobby", "errorCallback"]),

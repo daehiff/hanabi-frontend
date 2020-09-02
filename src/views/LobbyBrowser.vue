@@ -96,7 +96,7 @@ export default {
         setTimeout(this.findAllLobbies, 2000);
       } catch (error) {
         if (error == "LOGIN") {
-          this.$router.push("login");
+          this.$router.push({ name: "login" });
         } else {
           console.error("Lobbybrowser", error);
         }
@@ -109,7 +109,7 @@ export default {
         this.$router.push({ name: "lobby", params: { lobbyId: lobbyId } });
       } catch (error) {
         if (error == "LOGIN") {
-          this.$router.push("login");
+          this.$router.push({ name: "login" });
         } else {
           console.error("Lobbybrowser", error);
         }
@@ -135,7 +135,7 @@ export default {
         this.$router.push({ name: "lobby", params: { lobbyId: lobbyId } });
       } catch (error) {
         if (error == "LOGIN") {
-          this.$router.push("login");
+          this.$router.push({ name: "login" });
         }
         this.errorLobbySalt = error;
         this.errorUnknownSalt = true;

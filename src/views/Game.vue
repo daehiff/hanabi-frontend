@@ -82,11 +82,12 @@
       <br />
       <p>Stacks</p>
       <div class="playerCards">
-          <card
-            v-for="pile in gameToPlay.piles" :key="pile[0]"
-            class="card"
-            :card="{ color: pile[0], number: pile[1] }"
-          ></card>
+        <card
+          v-for="pile in gameToPlay.piles"
+          :key="pile[0]"
+          class="card"
+          :card="{ color: pile[0], number: pile[1] }"
+        ></card>
       </div>
     </div>
     <div class="cardWrapperWrapper">
@@ -251,7 +252,7 @@ export default {
         setTimeout(this.pollGame, 2000);
       } catch (error) {
         if (error == "LOGIN") {
-          this.$router.push("login");
+          this.$router.push({ name: "login" });
         } else {
           console.error("", error);
         }

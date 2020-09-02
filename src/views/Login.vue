@@ -30,7 +30,7 @@
       class="login-loginbutton"
       color="primary"
       type="border"
-      @click="$router.push('register')"
+      @click="$router.push({name: 'register'})"
       :disabled="loading"
       >Register</vs-button
     >
