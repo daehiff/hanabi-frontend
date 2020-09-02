@@ -1,5 +1,6 @@
 <template>
   <div>
+    <p>Login</p>
     <vs-input
       class="login-emailpw"
       type="email"
@@ -30,7 +31,7 @@
       class="login-loginbutton"
       color="primary"
       type="border"
-      @click="$router.push({name: 'register'})"
+      @click="$router.push({ name: 'register' })"
       :disabled="loading"
       >Register</vs-button
     >
@@ -60,7 +61,7 @@ export default {
       this.errorLogin = false;
       try {
         await this.logUserIn(this.loginData);
-        this.$router.push({name: "lobbyBrowser"});
+        this.$router.push({ name: "lobbyBrowser" });
       } catch (errorMsg) {
         this.errorLogin = true;
         this.errorLoginMsg = errorMsg;

@@ -50,7 +50,7 @@ router.beforeEach(async (to, from, next) => {
     await store._actions.setUser[0]();
     next();
   } catch (error) {
-    if (to.name != "login") {
+    if (to.name != "login" && to.name != "register") {
       next({ name: 'login' }); // TOOD create fancy popup or sth...
     } else next();
   }
