@@ -165,7 +165,7 @@ export default {
       },
       activatePopup: false,
       isPlayAction: false,
-      stopPoll: true,
+      stopPoll: false,
       showWonLost: false,
       wonLostTitle: "UNDEFINED",
     };

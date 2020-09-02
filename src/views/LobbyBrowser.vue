@@ -27,7 +27,7 @@
         >
       </div>
     </vs-popup>
-    <p class="lobbyHeader">Lobbys</p>
+    <p class="lobbyHeader">Lobbys (0.1)</p>
     <p class="publicDesciption">Public Lobbys:</p>
     <div class="lobbyListWrapper">
       <div class="lobbyList">
