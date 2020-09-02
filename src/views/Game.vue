@@ -78,7 +78,7 @@
       <p>Lives: {{ gameToPlay.lives }}</p>
       <p>Hints: {{ gameToPlay.hints }}</p>
       <p>Points {{ gameToPlay.points }}</p>
-      <p>Discard Pile: {{ 1 }}</p>
+      <p>Discard Pile: {{gameToPlay.discardPile.length  }}</p>
       <br />
       <p>Stacks</p>
       <div class="playerCards">
@@ -149,7 +149,6 @@ export default {
     firework: Firework,
   },
   created() {
-    console.log("Game");
     this.pollGame();
   },
   data() {

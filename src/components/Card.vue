@@ -52,7 +52,7 @@ export default {
   color: black;
 }
 .backgroundYellow {
-  background-color: yellow;
+  background-color: orange;
 }
 .backgroundGreen {
   background-color: green;
