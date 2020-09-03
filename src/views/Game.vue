@@ -22,9 +22,7 @@
           Congratulations you have won with : {{ gameToPlay.points }} Points
         </p>
         <p class="wonLostText" v-else>You Lost.</p>
-        <vs-button
-          class="wonLostButton"
-          @click="$router.push({ name: 'lobbyBrowser' })"
+        <vs-button class="wonLostButton" @click="backtoMain"
           >Back to Main Menu</vs-button
         >
       </div>
@@ -43,22 +41,29 @@
         </div>
         <p class="playError" v-if="playError != null">Error: {{ playError }}</p>
         <div class="cardButtons">
-          <vs-button @click="cardMoveHandle('DiscardAction')"
+          <vs-button
+            :disabled="loading"
+            @click="cardMoveHandle('DiscardAction')"
             >Discard Card</vs-button
           >
-          <vs-button @click="cardMoveHandle('PlayAction')">Play Card</vs-button>
+          <vs-button :disabled="loading" @click="cardMoveHandle('PlayAction')"
+            >Play Card</vs-button
+          >
         </div>
       </div>
       <div v-else>
         <div class="hintWrapper">
           <div class="hintSwitch">
             <label>Color Hint</label> &nbsp;
-            <vs-switch v-model="hintSettings.isColor"></vs-switch>
+            <vs-switch
+              :disabled="loading"
+              v-model="hintSettings.isColor"
+            ></vs-switch>
           </div>
           <div>
             <vs-input-number
               v-if="!hintSettings.isColor"
-              :disabled="false"
+              :disabled="loading"
               :max="5"
               :min="1"
               v-model="hintSettings.number"
@@ -66,7 +71,7 @@
             />
             <vs-select
               v-else
-              :disabled="false"
+              :disabled="loading"
               placeholder="Select Color"
               label="Color"
               v-model="hintSettings.color"
@@ -82,7 +87,9 @@
         </div>
         <p class="playError" v-if="playError != null">Error: {{ playError }}</p>
         <div class="cardButtons">
-          <vs-button @click="giveHintHandle">Give Hint</vs-button>
+          <vs-button :disabled="loading" @click="giveHintHandle"
+            >Give Hint</vs-button
+          >
         </div>
       </div>
     </vs-popup>
@@ -113,7 +120,7 @@
                   : 0
               }}
             </p>
-            <br style="width: 1em">
+            <br style="width: 1em" />
             <vs-button @click="showDiscardedCards = true"
               >Show Discard Pile</vs-button
             >
@@ -199,6 +206,7 @@ export default {
   },
   data() {
     return {
+      loading: false,
       playError: null,
       popupTitle: "UNDEFINED",
       cardData: {},
@@ -226,7 +234,12 @@ export default {
     ...mapState(["gameToPlay", "user"]),
   },
   methods: {
+    backtoMain() {
+      this.$router.push({ name: "lobbyBrowser" });
+      this.stopPoll = true;
+    },
     async cardMoveHandle(tag) {
+      this.loading = true;
       this.playError = null;
       let moveAction = {
         tag: tag,
@@ -238,8 +251,10 @@ export default {
       } catch (error) {
         this.playError = error;
       }
+      this.loading = false;
     },
     async giveHintHandle() {
+      this.loading = true;
       this.playError = null;
       // TODO loading animation
       let moveAction = {
@@ -255,6 +270,7 @@ export default {
       } catch (error) {
         this.playError = error;
       }
+      this.loading = false;
     },
     showCardMoveHandle(cardInfo) {
       this.playError = null;
@@ -324,9 +340,9 @@ export default {
 }
 .gameInfoButtons {
   display: flex;
-    flex-direction: row;
+  flex-direction: row;
   justify-content: space-evenly;
-  align-items: center; 
+  align-items: center;
 }
 
 .pilesfade-enter-active,

@@ -148,9 +148,10 @@ const store = new Vuex.Store({
       commit("setGame", game);
     },
 
-    async makeMove({ state }, moveAction) {
+    async makeMove({ state, commit }, moveAction) {
       await state.request.makeMove(moveAction, state.gameToPlay.gid);
-      //commit("setGame", game);
+      let game = await state.request.gameStatus(state.gameToPlay.gid);
+      commit("setGame", game);
     }
   }
 });
