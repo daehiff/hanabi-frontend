@@ -12,6 +12,9 @@
       </div>
     </vs-popup>
     <router-view class="view-wrapper"> </router-view>
+    <div class="view-footer">
+      Icons erstellt von <a href="https://www.flaticon.com/de/autoren/smashicons" title="Smashicons">Smashicons</a> from <a href="https://www.flaticon.com/de/" title="Flaticon"> www.flaticon.com</a>
+    </div>
   </div>
 </template>
 
@@ -46,6 +49,10 @@ export default {
 </script>
 
 <style>
+.view-footer {
+  width: 100vw;
+  height: 2vh;
+}
 .view-wrapper {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   display: flex;
@@ -53,7 +60,7 @@ export default {
   align-items: center;
   flex-direction: column;
   width: 100vw;
-  height: 100vh;
+  height: 97vh;
   margin: 0;
 }
 </style>
