@@ -88,6 +88,8 @@ const store = new Vuex.Store({
     },
     async getLobbyStatus({ state, commit }, lobbyId) {
       let lobby = await state.request.getLobbyStatus(lobbyId);
+      let chat = await state.request.getChat(lobby.lobbyChatID);
+      lobby.chat = chat.messages.reverse();
       lobby.isHost = lobby.lobbyHost == state.user.uid;
       commit("setLobby", lobby);
       return lobby;
@@ -152,6 +154,15 @@ const store = new Vuex.Store({
       await state.request.makeMove(moveAction, state.gameToPlay.gid);
       let game = await state.request.gameStatus(state.gameToPlay.gid);
       commit("setGame", game);
+    },
+
+    async sendChatMsg({ state, commit }, msg) {
+      await state.request.sendMsg(state.joinedLobby.lobbyChatID, msg);
+      let lobby = await state.request.getLobbyStatus(state.joinedLobby.lid);
+      let chat = await state.request.getChat(lobby.lobbyChatID);
+      lobby.chat = chat.messages.reverse();
+      lobby.isHost = lobby.lobbyHost == state.user.uid;
+      commit("setLobby", lobby);
     }
   }
 });

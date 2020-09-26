@@ -103,6 +103,9 @@ class Request {
       let resp = await this.instance.get(`lobby/${lobbyId}/status`);
       this._updateToken(resp.headers.auth);
       if (resp.status == 200) {
+        let lobby = resp.data.success.message;
+        let players = await Promise.all(lobby.player.map(async (id) => this.getUserByID(id)));
+        lobby.player = players;
         return resp.data.success.message;
       } // TODO exists an else case? 
     } catch (error) {
@@ -110,6 +113,45 @@ class Request {
       this._handleServerResponse(error);
     }
   }
+  async getChat(chatId) {
+    try {
+      let resp = await this.instance.get(`chat/${chatId}/status`);
+      this._updateToken(resp.headers.auth);
+      if (resp.status == 200) {
+        let chat = resp.data.success.message;
+        let participantIds = Array.from(new Set(chat.messages.map((msg) => msg.sender)));
+        let participants = await Promise.all(participantIds.map(async (id) => this.getUserByID(id)));
+        let idName = participants.reduce(function (map, participant) {
+          map[participant.uid] = participant.username;
+          return map;
+        }, {});
+
+        chat.messages = chat.messages.map((msg) => {
+          msg.sender = idName[msg.sender];
+          return msg;
+        });
+        return resp.data.success.message;
+      } // TODO exists an else case? 
+    } catch (error) {
+      console.log(error);
+      this._checkAuthError(error);
+      this._handleServerResponse(error);
+    }
+  }
+
+  async getUserByID(id) {
+    try {
+      let resp = await this.instance.get(`user/${id}/status`);
+      this._updateToken(resp.headers.auth);
+      if (resp.status == 200) {
+        return resp.data.success.message;
+      } // TODO exists an else case? 
+    } catch (error) {
+      this._checkAuthError(error);
+      this._handleServerResponse(error);
+    }
+  }
+
   async adjustSettings(newLobby) {
     try {
       let resp = await this.instance.post(`lobby/${newLobby.lid}/settings`, { "settings": newLobby.gameSettings });
@@ -170,6 +212,7 @@ class Request {
         let game = resp.data.success.message;
         let cards = cResps.data.success.message;
         let ownCards = ocResp.data.success.message;
+        //let chat = await this.instance.get(`game/${game.}`)
         game.discardPile = cards.discardPile;
         game.players.forEach(player => {
           player.cards = cards[player.playerId];
@@ -187,6 +230,19 @@ class Request {
   async makeMove(moveAction, gameId) {
     try {
       let resp = await this.instance.post(`game/${gameId}/move`, moveAction);
+      this._updateToken(resp.headers.auth);
+      if (resp.status == 200) {
+        return resp.data.success.message;
+      } // TODO exists an else case? 
+    } catch (error) {
+      this._checkAuthError(error);
+      this._handleServerResponse(error);
+    }
+  }
+
+  async sendMsg(chatId, msg) {
+    try {
+      let resp = await this.instance.post(`chat/${chatId}/send`, { "message": msg });
       this._updateToken(resp.headers.auth);
       if (resp.status == 200) {
         return resp.data.success.message;

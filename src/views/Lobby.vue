@@ -16,11 +16,17 @@
           v-for="player in joinedLobby.player"
           :key="player"
         >
-          <span>{{ player }}</span>
+          <span>{{ player.username }}</span>
         </div>
       </div>
     </div>
-    <div>
+    <chat
+      @sendMsg="sendMsgHandle"
+      class="chat"
+      :chatData="joinedLobby.chat"
+      :currentPlayer="user.username"
+    ></chat>
+    <div class="settings">
       <span class="lobbyText"> Settings</span>
       <div class="settingsLayout">
         <div>
@@ -64,6 +70,7 @@
         </vs-select>
       </div>
     </div>
+
     <vs-button
       :disabled="!joinedLobby.isHost || loading"
       class="button"
@@ -92,9 +99,13 @@
 
 <script>
 import { mapState, mapActions } from "vuex";
+import Chat from "../views/Chat";
 
 export default {
   name: "Lobby",
+  components: {
+    chat: Chat,
+  },
   created() {
     this.stopPoll = false;
     this.pollLobbyStatus();
@@ -107,6 +118,9 @@ export default {
     };
   },
   methods: {
+    async sendMsgHandle(msg) {
+      await this.sendChatMsg(msg);
+    },
     updateSettings(type, input) {
       this.settingsInputChange({ type: type, input: input });
     },
@@ -135,7 +149,6 @@ export default {
         this.loading = false;
       }
     },
-    async closeLobby() {},
     async leaveLobbyHandle() {
       this.loading = true;
       try {
@@ -169,7 +182,7 @@ export default {
           this.$router.push({ name: "login" }); // TODO create global login popup
         } else {
           this.errorCallback("INTERNAL", "Lobby has been closed");
-          this.$router.push({ name: "lobbyBrowser" });
+          //this.$router.push({ name: "lobbyBrowser" });
         }
       }
     },
@@ -179,15 +192,28 @@ export default {
       "launchGame",
       "leaveLobby",
       "destroyLobby",
+      "sendChatMsg",
     ]),
   },
   computed: {
-    ...mapState(["joinedLobby", "errorCallback"]),
+    ...mapState(["joinedLobby", "errorCallback", "user"]),
   },
 };
 </script>
 
 <style>
+.chat:hover {
+  -webkit-box-shadow: 0 8px 25px -8px rgba(var(--vs-primary), 1);
+  box-shadow: 0 8px 25px -8px rgba(var(--vs-primary), 1);
+}
+
+.chat {
+  width: 80% !important;
+  border: 1px solid rgba(var(--vs-primary), 1);
+  border-radius: 6px;
+  padding: 0.5em;
+  margin-bottom: 1em;
+}
 .button {
   width: 75% !important;
   margin-bottom: 1em;

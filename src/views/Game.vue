@@ -34,7 +34,11 @@
       :boxWidth="'100%'"
     >
     </firework>
-    <vs-popup :title="popupTitle" :active.sync="activatePopup">
+    <vs-popup
+      :title="popupTitle"
+      :button-close-hidden="loading"
+      :active.sync="activatePopup"
+    >
       <div v-if="isPlayAction">
         <div>
           {{ cardData }}
@@ -95,11 +99,28 @@
     </vs-popup>
 
     <p class="gameHeading">Game</p>
+    <br>
     <div class="cardWrapper">
       <div class="gameInfo">
         <div class="gameInfoColumn">
-          <p>Lives: {{ gameToPlay.lives }}</p>
-          <p>Hints: {{ gameToPlay.hints }}</p>
+          <div>
+            Lives:
+            <img
+              v-for="hint in new Array(gameToPlay.lives)"
+              :key="hint"
+              class="hintLivesImg"
+              src="../assets/live.png"
+            />
+          </div>
+          <div>
+            Hints:
+            <img
+              v-for="hint in new Array(gameToPlay.hints)"
+              :key="hint"
+              class="hintLivesImg"
+              src="../assets/hint.png"
+            />
+          </div>
           <p>Points {{ gameToPlay.points }}</p>
         </div>
         <div class="gameInfoColumn">
@@ -326,6 +347,10 @@ export default {
 </script>
 
 <style scoped>
+.hintLivesImg {
+  width: 1em;
+  height: 1em;
+}
 .gameInfo {
   display: flex;
   flex-direction: row;
