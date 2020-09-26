@@ -59,12 +59,17 @@ export default {
       }.bind(this),
       500
     );
-    window.addEventListener("keyup", (e) => {
+    window.addEventListener("keyup", this.onKeyUp);
+    window.addEventListener("keydown", this.onKeyDown);
+  },
+  methods: {
+    onKeyUp(e) {
+      console.log(e);
       if (e.key == "Shift") {
         this.isEscape = true;
       }
-    });
-    window.addEventListener("keydown", (e) => {
+    },
+    onKeyDown(e) {
       if (e.key == "Enter") {
         if (this.isEscape) {
           this.emitMsg();
@@ -72,9 +77,7 @@ export default {
       } else if (e.key == "Shift") {
         this.isEscape = false;
       }
-    });
-  },
-  methods: {
+    },
     emitMsg() {
       this.$emit("sendMsg", this.text);
       this.text = "";

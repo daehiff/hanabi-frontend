@@ -55,6 +55,13 @@ import { mapActions } from "vuex";
 
 export default {
   name: "Register",
+  created() {
+    window.addEventListener("keydown", this.onEnter);
+  },
+  beforeRouteLeave(to, from, next) {
+    window.removeEventListener("keydown", this.onEnter);
+    next();
+  },
   data() {
     return {
       loading: false,
@@ -68,6 +75,11 @@ export default {
     };
   },
   methods: {
+    onEnter(e) {
+      if (e.key == "Enter") {
+        this.registrationHandle();
+      }
+    },
     ...mapActions(["registerUser"]),
     async registrationHandle() {
       this.loading = true;

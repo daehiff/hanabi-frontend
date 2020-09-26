@@ -43,6 +43,13 @@ import { mapActions } from "vuex";
 
 export default {
   name: "Login",
+  created() {
+    window.addEventListener("keydown", this.onEnter);
+  },
+  beforeRouteLeave(to, from, next) {
+    window.removeEventListener("keydown", this.onEnter);
+    next();
+  },
   data() {
     return {
       errorLoginMsg: "",
@@ -55,6 +62,11 @@ export default {
     };
   },
   methods: {
+    onEnter(e) {
+      if (e.key == "Enter") {
+        this.logInHandle();
+      }
+    },
     ...mapActions(["logUserIn"]),
     async logInHandle() {
       this.loading = true;

@@ -29,6 +29,8 @@
       </div>
     </div>
     <chat
+      id="chat"
+      ref="chat"
       @sendMsg="sendMsgHandle"
       class="chat"
       :chatData="joinedLobby.chat"
@@ -119,6 +121,9 @@ export default {
     this.pollLobbyStatus();
   },
   async beforeRouteLeave(to, from, next) {
+    let chat = this.$refs["chat"];
+    window.removeEventListener("keyup", chat.onKeyUp);
+    window.removeEventListener("keydown", chat.onKeyDown);
     if (window.scrollChat) {
       window.clearInterval(window.scrollChat);
     }

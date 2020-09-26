@@ -6,7 +6,6 @@ const LOBBY_DESTROYED = 6;
 
 class Request {
   constructor(baseUrl) {
-    console.log(baseUrl);
     this.baseURL = baseUrl;
     this.instance = axios.create({
       baseURL: baseUrl,
@@ -155,7 +154,6 @@ class Request {
         return resp.data.success.message;
       } // TODO exists an else case? 
     } catch (error) {
-      console.log(error);
       this._checkAuthError(error);
       this._handleServerResponse(error);
     }
