@@ -2,7 +2,7 @@
   <div class="chat">
     <p>Chat</p>
     <br />
-    <div id="chat" class="chatWrapper">
+    <div id="chatBubbleID-2324" class="chatWrapper">
       <div
         :class="{
           chatBubbleWrapper: true,
@@ -48,11 +48,18 @@ export default {
       prevElements: 0,
     };
   },
+  watch: {
+    text(newText) {
+      if (newText == "\n") {
+        this.text = "";
+      }
+    },
+  },
   created() {
     window.scrollChat = window.setInterval(
       function() {
-        if (this.prevElements !== this.chatData.length) {
-          let elem = document.getElementById("chat");
+        if (this.prevElements != this.chatData.length) {
+          let elem = document.getElementById("chatBubbleID-2324");
           elem.scrollTop = elem.scrollHeight;
         }
         this.prevElements = this.chatData.length;
@@ -64,7 +71,6 @@ export default {
   },
   methods: {
     onKeyUp(e) {
-      console.log(e);
       if (e.key == "Shift") {
         this.isEscape = true;
       }
@@ -79,7 +85,7 @@ export default {
       }
     },
     emitMsg() {
-      this.$emit("sendMsg", this.text);
+      if (this.text != "") this.$emit("sendMsg", this.text);
       this.text = "";
     },
   },
