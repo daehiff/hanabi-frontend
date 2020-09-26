@@ -23,7 +23,9 @@
     <div class="chatTextArea">
       <vs-textarea class="chatSendButton" v-model="text" />
       <br />
-      <vs-button class="chatSendButton" color="primary" @click="emitMsg">Send</vs-button>
+      <vs-button class="chatSendButton" color="primary" @click="emitMsg"
+        >Send</vs-button
+      >
     </div>
   </div>
 </template>
@@ -47,7 +49,7 @@ export default {
     };
   },
   created() {
-    window.setInterval(
+    window.scrollChat = window.setInterval(
       function() {
         if (this.prevElements !== this.chatData.length) {
           let elem = document.getElementById("chat");

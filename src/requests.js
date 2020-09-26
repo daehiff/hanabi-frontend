@@ -105,6 +105,20 @@ class Request {
       this._handleServerResponse(error);
     }
   }
+
+  async kickPlayer(userId, lobbyId) {
+    try {
+      let resp = await this.instance.post(`lobby/${lobbyId}/kick/${userId}`);
+      this._updateToken(resp.headers.auth);
+      if (resp.status == 200) {
+        return resp.data.success.message;
+      } // TODO exists an else case? 
+    } catch (error) {
+      this._checkAuthError(error);
+      this._handleServerResponse(error);
+    }
+  }
+
   async getLobbyStatus(lobbyId) {
     try {
       let resp = await this.instance.get(`lobby/${lobbyId}/status`);

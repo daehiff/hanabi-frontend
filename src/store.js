@@ -125,7 +125,11 @@ const store = new Vuex.Store({
       await state.request.adjustSettings(newLobby); // TODO do we have to await here?
       commit("setLobby", newLobby);
     },
-
+    async kickPlayer({ state, commit }, userId) {
+      let lobby = await state.request.kickPlayer(userId, state.joinedLobby.lid);
+      lobby.chat = state.joinedLobby.chat;
+      commit("setLobby", lobby);
+    },
     async launchGame({ state, commit }) {
       let lobby = await state.request.launchGame(state.joinedLobby);
       commit("setLobby", lobby);

@@ -99,7 +99,7 @@
     </vs-popup>
 
     <p class="gameHeading">Game</p>
-    <br>
+    <br />
     <div class="cardWrapper">
       <div class="gameInfo">
         <div class="gameInfoColumn">
@@ -227,6 +227,7 @@ export default {
   },
   data() {
     return {
+      colors: ["Red", "Green", "Yellow", "Blue", "White"],
       loading: false,
       playError: null,
       popupTitle: "UNDEFINED",
@@ -246,12 +247,6 @@ export default {
     };
   },
   computed: {
-    colors() {
-      if (this.gameToPlay.settings.isRainbow)
-        return ["Red", "Green", "Yellow", "Blue", "White"];
-      // TODO remove
-      else return ["Red", "Green", "Yellow", "Blue", "White"];
-    },
     ...mapState(["gameToPlay", "user"]),
   },
   methods: {

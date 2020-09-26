@@ -12,11 +12,19 @@
           No Player joined</span
         >
         <div
-          class="playerNameSpan"
+          class="playerNameWarpper"
           v-for="player in joinedLobby.player"
           :key="player.uid"
         >
-          <span>{{ player.username }}</span>
+          <span class="playerNameSpan">{{ player.username }}</span>
+          <vs-button
+            v-show="joinedLobby.isHost"
+            class="kickPlayerButton"
+            color="danger"
+            type="border"
+            icon="close"
+            @click="kickPlayer(player.uid)"
+          ></vs-button>
         </div>
       </div>
     </div>
@@ -111,6 +119,9 @@ export default {
     this.pollLobbyStatus();
   },
   async beforeRouteLeave(to, from, next) {
+    if (window.scrollChat) {
+      window.clearInterval(window.scrollChat);
+    }
     if (this.buttonCLicked) {
       next();
       return;
@@ -137,6 +148,11 @@ export default {
     };
   },
   methods: {
+    async kickPlayer(userId) {
+      this.loading = true;
+      await this.kickPlayer(userId);
+      this.loading = false;
+    },
     async sendMsgHandle(msg) {
       await this.sendChatMsg(msg);
     },
@@ -153,6 +169,7 @@ export default {
     },
     async launchGameHandle() {
       this.loading = true;
+      this.buttonCLicked = true;
       try {
         let lobby = await this.launchGame();
         this.$router.push({ name: "game", params: { gameId: lobby.gameId } });
@@ -194,6 +211,7 @@ export default {
       try {
         let lobby = await this.getLobbyStatus(this.$route.params.lobbyId);
         if (lobby.launched) {
+          this.buttonCLicked = true;
           this.stopPoll = true;
           this.$router.push({ name: "game", params: { gameId: lobby.gameId } });
         }
@@ -214,6 +232,7 @@ export default {
       }
     },
     ...mapActions([
+      "kickPlayer",
       "getLobbyStatus",
       "settingsInputChange",
       "launchGame",
@@ -302,7 +321,17 @@ export default {
   overflow: scroll;
 }
 
+.kickPlayerButton {
+  position: relative;
+}
 .playerNameSpan {
+  width: 100%;
+}
+.playerNameWarpper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
   margin: 0 !important;
   margin-top: 0.5em !important;
   margin-bottom: 0.5em !important;

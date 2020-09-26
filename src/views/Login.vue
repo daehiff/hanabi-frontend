@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p>Login</p>
+    <p class="loginHeader">Login</p>
     <vs-input
       class="login-emailpw"
       type="email"
@@ -73,6 +73,10 @@ export default {
 </script>
 
 <style scoped>
+.loginHeader {
+  margin-bottom: 3em;
+  font-size: 130%;
+}
 .login-errormsg {
   color: rgba(var(--vs-danger), 1);
   text-align: start;
