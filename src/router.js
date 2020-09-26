@@ -18,7 +18,7 @@ const router = new VueRouter({
     {
       name: 'lobbyBrowser',
       path: '/', component: LobbyBrowser,
-      async beforeEnter(to, from, next) {
+      beforeEnter(to, from, next) {
 
         let authToken = localStorage.getItem('hanabi-auth-token');
 

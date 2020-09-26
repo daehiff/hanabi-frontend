@@ -29,6 +29,13 @@ Vue.use(Vuesax, {
 Vue.use(Vuex);
 Vue.use(VueRouter);
 
+
+Vue.mixin({
+  beforeRouteUpdate(to, from ,next) {
+    console.log("Mixin", to, from, next);
+  }
+});
+
 Vue.config.productionTip = false;
 
 new Vue({

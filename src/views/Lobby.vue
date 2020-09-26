@@ -14,7 +14,7 @@
         <div
           class="playerNameSpan"
           v-for="player in joinedLobby.player"
-          :key="player"
+          :key="player.uid"
         >
           <span>{{ player.username }}</span>
         </div>
@@ -110,11 +110,30 @@ export default {
     this.stopPoll = false;
     this.pollLobbyStatus();
   },
+  async beforeRouteLeave(to, from, next) {
+    if (this.buttonCLicked) {
+      next();
+      return;
+    }
+    const answer = window.confirm(this.leaveText);
+    if (answer) {
+      this.loading = true;
+      if (this.joinedLobby.isHost) {
+        await this.destroyLobby();
+      } else {
+        await this.leaveLobby();
+      }
+      this.stopPoll = true;
+      this.loading = false;
+      next();
+    } else next(false);
+  },
   data() {
     return {
       levels: ["Hard", "Easy", "Middle", "Beginner"],
       stopPoll: false,
       loading: false,
+      buttonCLicked: false,
     };
   },
   methods: {
@@ -125,6 +144,7 @@ export default {
       this.settingsInputChange({ type: type, input: input });
     },
     async destroyLobbyHandle() {
+      this.buttonCLicked = true;
       this.loading = true;
       await this.destroyLobby();
       this.stopPoll = true;
@@ -150,6 +170,7 @@ export default {
       }
     },
     async leaveLobbyHandle() {
+      this.buttonCLicked = true;
       this.loading = true;
       try {
         await this.leaveLobby();
@@ -178,11 +199,17 @@ export default {
         }
         setTimeout(this.pollLobbyStatus, 2000);
       } catch (error) {
+        console.error(error);
         if (error == "LOGIN") {
-          this.$router.push({ name: "login" }); // TODO create global login popup
+          this.$router.push({ name: "login" });
+        } else if (error == "LOBBY_DESTROYED") {
+          this.buttonCLicked = true;
+          this.errorCallback("INTERNAL", "Lobby has been closed"); // Dirty but i am lazy :)
+          this.$router.push({ name: "lobbyBrowser" });
         } else {
-          this.errorCallback("INTERNAL", "Lobby has been closed");
-          //this.$router.push({ name: "lobbyBrowser" });
+          this.buttonCLicked = true;
+          this.errorCallback("INTERNAL", "Internal Error :( Sorry");
+          this.$router.push({ name: "lobbyBrowser" });
         }
       }
     },
@@ -197,6 +224,13 @@ export default {
   },
   computed: {
     ...mapState(["joinedLobby", "errorCallback", "user"]),
+    leaveText() {
+      if (this.joinedLobby.isHost) {
+        return "Do you really want to exit? You will close this lobby.";
+      } else {
+        return "Do you really want to exit? You will leave this lobby.";
+      }
+    },
   },
 };
 </script>

@@ -2,6 +2,8 @@ import axios from "axios";
 
 const AUTH_ERROR = 1;
 
+const LOBBY_DESTROYED = 6;
+
 class Request {
   constructor(baseUrl) {
     console.log(baseUrl);
@@ -21,6 +23,11 @@ class Request {
       throw resp.data.error.message;
     } else {
       throw "INTERNAL";
+    }
+  }
+  _checkLobbyDestroyed(error) {
+    if (error.response != null && error.response.data.error.code == LOBBY_DESTROYED) {
+      throw "LOBBY_DESTROYED";
     }
   }
 
@@ -110,6 +117,7 @@ class Request {
       } // TODO exists an else case? 
     } catch (error) {
       this._checkAuthError(error);
+      this._checkLobbyDestroyed(error);
       this._handleServerResponse(error);
     }
   }
